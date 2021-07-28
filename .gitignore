@@ -1,0 +1,12 @@
+haarcascade_frontalface_default.xml
+__pycache__
+Teams*/
+face_detect.py
+high_low.py
+FaceDetect/
+realtime_stats/
+combine_bak.py
+top30_selenium.py
+venv/
+settings.json
+chromedriver.exe
