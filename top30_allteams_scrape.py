@@ -119,7 +119,7 @@ class TestTop30():
     self.driver.quit()
 
 def master_combine(folder):
-  files = glob.glob('Teams3/*')
+  files = glob.glob(f'{folder}/*')
   today = date.today().strftime('%m-%d')
 
   all_data = pd.DataFrame()
