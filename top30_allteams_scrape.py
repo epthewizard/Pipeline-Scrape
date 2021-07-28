@@ -153,4 +153,5 @@ def main():
       scrape.teardown_method()
   master_combine()
   
-main()
+if __name__ == "__main__":
+  main()
