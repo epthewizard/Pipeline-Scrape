@@ -1,13 +1,8 @@
-from selenium import webdriver
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver import ChromeOptions, Chrome
 import time
-from fake_useragent import UserAgent
 from alive_progress import alive_bar
 from settings import TEAM_NAMES, CHROMEDRIVER_PATH
 import pandas as pd
@@ -23,11 +18,9 @@ class TestTop30():
     self.org = org
     opts = ChromeOptions()
     opts.add_experimental_option("detach", True)
-    ua = UserAgent()
-    opts.add_argument(f'user-agent={ua.random}')
     opts.add_argument('--headless')
     opts.add_argument('log-level=3')
-    self.driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, options=opts)
+    self.driver = Chrome(executable_path=CHROMEDRIVER_PATH, options=opts)
 
   # Go to the scraped teams top30 page and drop down the entire list  
   def test_top30(self):
@@ -40,7 +33,6 @@ class TestTop30():
 
   # Scrape the list of players and create pandas dataframe for other information to be added
   def extract_players(self):
-
     # Grab the basic information from the page source
     self.df = pd.read_html(self.driver.page_source)[0]
     teams = []
@@ -48,6 +40,7 @@ class TestTop30():
     players = []
     handles = []
     drafted = []
+
     with alive_bar(30, title=self.team,length=30, bar='checks', spinner='dots_waves') as bar:
       for num in range(1, 31):
         player = self.df['Player'][num-1]
@@ -82,7 +75,7 @@ class TestTop30():
 
             while True:
               try:
-                team = element.text.split(',')[1]
+                team = element.text.split(',')[1].lstrip()
               except Exception as e:
                 print(e)
                 team = 'None'
