@@ -5,6 +5,7 @@ from selenium.webdriver import ChromeOptions, Chrome
 import time
 from alive_progress import alive_bar
 from settings import TEAM_NAMES, CHROMEDRIVER_PATH
+from fake_useragent import UserAgent
 import pandas as pd
 from datetime import date
 import glob
@@ -16,8 +17,10 @@ class TestTop30():
   def __init__(self, team, org):
     self.team = team
     self.org = org
+    ua = UserAgent()
     opts = ChromeOptions()
-    opts.add_experimental_option("detach", True)
+    opts.add_argument(f'user-agent={ua.random}')
+    # opts.add_experimental_option("detach", True)
     opts.add_argument('--headless')
     opts.add_argument('log-level=3')
     self.driver = Chrome(executable_path=CHROMEDRIVER_PATH, options=opts)
@@ -48,7 +51,7 @@ class TestTop30():
         team = None
         while not team:
           try:
-            self.driver.implicitly_wait(1)
+            self.driver.implicitly_wait(3)
             WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((
               By.CSS_SELECTOR, f".sc-VigVT:nth-child({str(num)}) .prospect-headshot__name"))).click()
             element = WebDriverWait(self.driver, 10).until(EC.visibility_of_element_located((
@@ -84,15 +87,19 @@ class TestTop30():
             if player not in players:
               teams.append(team)
               players.append(player)
-            WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((
-              By.CSS_SELECTOR, "button.drawer__close-container"))).click()
+
+            while True:
+              try:
+                WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((
+                  By.CSS_SELECTOR, "button.drawer__close-container"))).click()
+                break
+              except:
+                continue
 
           except KeyboardInterrupt:
             self.teardown_method()
             time.sleep(2)
             team = None
-            WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((
-              By.CSS_SELECTOR, "button.drawer__close-container"))).click()
         bar() 
 
     self.df['ORG'] = org
@@ -136,14 +143,22 @@ def main():
 
   for team, org in TEAM_NAMES.items():
     with alive_bar(2) as bar:
-      scrape = TestTop30(team, org)
-      bar.text('[+] Loading Team Page...')
-      scrape.test_top30()
-      bar()
-      scrape.extract_players()
-      print(scrape.df)
-      scrape.frame_to_excel(args.folder)
-      scrape.teardown_method()
+      while True:
+        try:
+          scrape = TestTop30(team, org)
+          bar.text('[+] Loading Team Page...')
+          scrape.test_top30()
+          bar()
+          scrape.extract_players()
+          print(scrape.df)
+          scrape.frame_to_excel(args.folder)
+          scrape.teardown_method()
+          break
+        except:
+          scrape.teardown_method()
+          del scrape
+          continue
+
   master_combine(args.folder)
   
 if __name__ == "__main__":
