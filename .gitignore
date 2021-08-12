@@ -7,6 +7,6 @@ FaceDetect/
 realtime_stats/
 combine_bak.py
 top30_selenium.py
-venv/
+venv*/
 settings.json
 chromedriver.exe
