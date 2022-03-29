@@ -111,6 +111,8 @@ class TestTop30():
 
   def frame_to_excel(self, folder):
     today = date.today().strftime('%m-%d')
+    if not os.path.exits(folder):
+      os.mkdir(folder)
     with pd.ExcelWriter(f'{folder}\\{self.team.replace(" ", "")}-{today}.xlsx', engine='openpyxl') as writer:
       self.df.to_excel(writer, sheet_name=f'{self.team}', index=False)
       writer.save()
